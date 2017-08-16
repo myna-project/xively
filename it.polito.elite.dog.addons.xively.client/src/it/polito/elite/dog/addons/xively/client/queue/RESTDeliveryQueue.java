@@ -128,6 +128,7 @@ public class RESTDeliveryQueue extends Thread
 			// get the oldest event in the queue
 			int sleepTime = this.emptyQueueTime;
 			DatapointInfo data = this.dispatchQueue.poll();
+			
 			if (data != null)
 			{
 				this.processData(data);
@@ -189,7 +190,7 @@ public class RESTDeliveryQueue extends Thread
 
 		// self-tunes only id enabled
 		this.selfTune();
-
+		
 		// add the JSON data to the queue
 		this.dispatchQueue.add(data);
 	}

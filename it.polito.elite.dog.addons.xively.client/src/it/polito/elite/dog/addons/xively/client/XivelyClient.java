@@ -76,6 +76,10 @@ public class XivelyClient implements ManagedService, EventHandler
 	private static final String XIVELY_BASE_URI = "xively.baseURI";
 	private static final String XIVELY_SERIAL = "xively.serial";
 	private static final String XIVELY_PRODUCT_SECRET = "xively.productSecret";
+	
+	private static final String XIVELY_CONNECTION_TIMEOUT = "xively.connectionTimeout";
+	private static final String XIVELY_SOCKET_TIMEOUT = "xively.socketTimeout";
+	private static final String XIVELY_CLIENT_ID = "xively.clientId";
 
 	// the bundle context
 	private BundleContext context;
@@ -97,6 +101,15 @@ public class XivelyClient implements ManagedService, EventHandler
 
 	// the dog serial number
 	private String serial;
+	
+	// the client id
+	private Integer clientId;
+	
+	// the connection timeout
+	private Integer connectionTimeout;
+	
+	// the socket timeout
+	private Integer socketTimeout;
 
 	// the supported media type
 	private MediaType mediaType;
@@ -330,6 +343,18 @@ public class XivelyClient implements ManagedService, EventHandler
 			this.mediaType = MediaType.valueOf((String) properties
 					.get(XivelyClient.XIVELY_MEDIA_TYPE));
 
+			// get the clientId
+			this.clientId = Integer.valueOf((String) properties
+					.get(XivelyClient.XIVELY_CLIENT_ID));
+			
+			// get the connectionTimeout
+			this.connectionTimeout = Integer.valueOf((String) properties
+					.get(XivelyClient.XIVELY_CONNECTION_TIMEOUT));
+			
+			// get the socketTimeout
+			this.socketTimeout = Integer.valueOf((String) properties
+					.get(XivelyClient.XIVELY_SOCKET_TIMEOUT));
+			
 			// get the base uri
 			String uri = (String) properties.get(XivelyClient.XIVELY_BASE_URI);
 
@@ -402,7 +427,8 @@ public class XivelyClient implements ManagedService, EventHandler
 
 			// update the appConfig
 			AppConfig appConfig = AppConfig.getInstance();
-			appConfig.setConnectionTimeout(5000);
+			appConfig.setConnectionTimeout(this.connectionTimeout);
+			appConfig.setSocketTimeout(this.connectionTimeout);
 			appConfig.setResponseMediaType(AcceptedMediaType.json);
 			appConfig.setBaseUri(this.baseURI);
 
@@ -531,11 +557,17 @@ public class XivelyClient implements ManagedService, EventHandler
 			// add the timestamp
 			dp.setAt(sdf.format(innerEvent.getTimestamp().getTime()));
 
+			dp.setClientId(clientId);
+			
 			if (this.key == null)
 				// add the value
 				dp.setValue(innerEvent.getValueAsMeasure().toString());
 			else
 				dp.setValue(innerEvent.getValue().toString());
+			
+			
+			this.logger.log(LogService.LOG_DEBUG, XivelyClient.logId
+					+ "ClientId: " + dp.getClientId());
 
 			// add the datapoint
 			datapointSet.add(dp);
