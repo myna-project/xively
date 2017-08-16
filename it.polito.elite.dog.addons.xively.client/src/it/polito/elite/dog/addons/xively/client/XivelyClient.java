@@ -46,7 +46,6 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.service.log.LogService;
 
 import com.xively.client.AppConfig;
-import com.xively.client.AppConfig.AcceptedMediaType;
 import com.xively.client.XivelyService;
 import com.xively.client.http.exception.HttpException;
 import com.xively.client.model.Datapoint;
@@ -54,6 +53,9 @@ import com.xively.client.model.Datastream;
 import com.xively.client.model.DeviceActivation;
 import com.xively.client.model.Feed;
 import com.xively.client.model.Unit;
+import com.xively.client.AppConfig.AcceptedMediaType;
+
+
 
 /**
  * @author <a href="mailto:dario.bonino@polito.it">Dario Bonino</a>
@@ -164,7 +166,7 @@ public class XivelyClient implements ManagedService, EventHandler
 		// log the activation
 		this.logger.log(LogService.LOG_INFO, XivelyClient.logId
 				+ "Activated XIVELYOutlet");
-
+		
 		// store the bundle context
 		this.context = ctx;
 	}
@@ -545,6 +547,11 @@ public class XivelyClient implements ManagedService, EventHandler
 			// check the list size
 			if (datapointSet.size() >= this.waitingListSize)
 			{
+				
+				/*
+				
+				MODIFICATO PER DOG 3 - Questi test vengono eseguiti da JeerpDa 
+				
 				// check if the channel exists
 				if (!this.existingChannels.contains(innerEvent.getStreamName()))
 				{
@@ -584,7 +591,9 @@ public class XivelyClient implements ManagedService, EventHandler
 						}
 					}
 				}
-
+				
+				*/ 
+				
 				// enqueue the data to be sent via rest
 				DatapointInfo data = new DatapointInfo(new Integer(eventFeed),
 						innerEvent.getStreamName(), datapointSet);

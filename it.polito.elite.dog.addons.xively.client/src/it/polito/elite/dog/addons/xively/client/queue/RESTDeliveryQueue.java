@@ -29,6 +29,7 @@ import org.osgi.service.log.LogService;
 import com.xively.client.AppConfig;
 import com.xively.client.AppConfig.AcceptedMediaType;
 import com.xively.client.XivelyService;
+import com.xively.client.http.exception.HttpException;
 import com.xively.client.model.Datastream;
 
 /**
@@ -305,7 +306,7 @@ public class RESTDeliveryQueue extends Thread
 
 			// debug
 			this.logger.log(LogService.LOG_DEBUG, RESTDeliveryQueue.logId
-					+ "Sending to feed " + data.getFeed() + ", datatstream"
+					+ "Sending to feed " + data.getFeed() + ", datatstream "
 					+ data.getDatastreamId() + " data: " + data.toString());
 
 			// create the data stream object representing the datastream to
@@ -320,10 +321,24 @@ public class RESTDeliveryQueue extends Thread
 
 			// set the latest value
 			ds.setValue(data.getLast().getValue());
-
+			
 			// update on xively
-			XivelyService.instance().datastream(data.getFeed()).update(ds);
-
+			try{
+			
+				XivelyService.instance().datastream(data.getFeed()).update(ds);
+			
+			}catch(HttpException e){
+				
+				this.logger.log(LogService.LOG_WARNING, RESTDeliveryQueue.logId
+						+ "Got exception while trying to sendind feed");
+				
+				this.logger.log(LogService.LOG_ERROR, RESTDeliveryQueue.logId
+						+ e );
+				
+				
+				
+			}
+			
 		}
 		catch (Exception e)
 		{
