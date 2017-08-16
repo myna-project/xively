@@ -29,6 +29,8 @@ public class Datapoint implements DomainObject, Comparable<Datapoint>
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 	String at;
 	String value;
+	Integer clientId;
+	
 
 	public String getAt()
 	{
@@ -43,6 +45,16 @@ public class Datapoint implements DomainObject, Comparable<Datapoint>
 	public String getValue()
 	{
 		return value;
+	}
+
+	public void setClientId(Integer clientId)
+	{
+		this.clientId = clientId;
+	}
+	
+	public Integer getClientId()
+	{
+		return clientId;
 	}
 
 	public void setValue(String value)

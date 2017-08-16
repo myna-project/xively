@@ -2,8 +2,12 @@
 // This is part of Xively4J library, it is under the BSD 3-Clause license.
 package com.xively.client.http;
 
+import java.net.CookieStore;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
@@ -20,6 +24,7 @@ import com.xively.client.AppConfig;
  */
 public class HttpClientBuilder
 {
+	// timeouts can be override in the xively configuration
 	private static final int DEFAULT_CONNECTION_TIMEOUT_IN_MS = 3000;
 	private static final int DEFAULT_SOCKET_TIMEOUT_IN_MS = 3000;
 
@@ -83,9 +88,25 @@ public class HttpClientBuilder
 	{
 		if (httpClient == null)
 		{
+			
+			RequestConfig requestConfig = RequestConfig.custom()
+					// connectionTimeout the time to establish the connection with the remote host			
+					.setConnectTimeout(this.connectionTimeout)
+					// socketTimeout is the time waiting for data – after the connection was established; maximum time of inactivity between two data packets
+					.setSocketTimeout(this.socketTimeout)
+					// connectionRequestTimeout is the time to wait for a connection from the connection manager/pool
+					.setConnectionRequestTimeout(this.connectionTimeout)
+					.build();
+			
+			// A timeout exception will print an output like this: "Timeout exception.: exception: Read timed out"
+			
 			httpClient = HttpClients.custom()
+					.setDefaultRequestConfig(requestConfig)
 			        .setRetryHandler(retryHandler)
+			        // set a cookie to store jsessionid 
+			        .setDefaultCookieStore(new BasicCookieStore())
 			        .build();
+			
 			if (retryHandler == null)
 			{
 				retryHandler = new DefaultHttpRequestRetryHandler(0, false);

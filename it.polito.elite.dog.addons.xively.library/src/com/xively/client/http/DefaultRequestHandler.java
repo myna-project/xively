@@ -4,6 +4,7 @@ package com.xively.client.http;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -115,6 +116,10 @@ public class DefaultRequestHandler
 		{
 			DefaultResponseHandler<T> responseHandler = new DefaultResponseHandler<T>();
 			response = getClient().execute(request, responseHandler);
+			
+		} catch( SocketTimeoutException e ){
+			
+			throw new HttpException("Timeout exception.", e);
 		} catch (HttpException e)
 		{
 			throw e;
