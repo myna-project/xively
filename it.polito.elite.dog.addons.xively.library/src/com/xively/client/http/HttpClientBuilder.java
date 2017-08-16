@@ -2,11 +2,17 @@
 // This is part of Xively4J library, it is under the BSD 3-Clause license.
 package com.xively.client.http;
 
-import java.net.CookieStore;
 
+import java.io.IOException;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
@@ -24,23 +30,29 @@ import com.xively.client.AppConfig;
  */
 public class HttpClientBuilder
 {
+	
+	
 	// timeouts can be override in the xively configuration
 	private static final int DEFAULT_CONNECTION_TIMEOUT_IN_MS = 3000;
 	private static final int DEFAULT_SOCKET_TIMEOUT_IN_MS = 3000;
-
+	private static final String DEFAULT_TOKEN = "/token";
+	
 	private HttpRequestRetryHandler retryHandler;
 	private CloseableHttpClient httpClient;
-	private int socketTimeout;
-	private int connectionTimeout;
+	private Integer socketTimeout;
+	private Integer connectionTimeout;
+	private String tokenEndpoint;
+	
 
 	private static HttpClientBuilder instance;
+	// crsf token
+	private static String token;
 
 	private HttpClientBuilder()
 	{
-		Integer userConnectionTimeout = AppConfig.getInstance().getConnectionTimeout();
-		connectionTimeout = userConnectionTimeout == null ? DEFAULT_CONNECTION_TIMEOUT_IN_MS : userConnectionTimeout;
-		Integer userSocketTimeout = AppConfig.getInstance().getSocketTimeout();
-		socketTimeout = userSocketTimeout == null ? DEFAULT_SOCKET_TIMEOUT_IN_MS : userSocketTimeout;
+		connectionTimeout = AppConfig.getInstance().getConnectionTimeout() == null ? DEFAULT_CONNECTION_TIMEOUT_IN_MS : connectionTimeout;
+		socketTimeout = AppConfig.getInstance().getSocketTimeout() == null ? DEFAULT_SOCKET_TIMEOUT_IN_MS : socketTimeout;
+		tokenEndpoint = AppConfig.getInstance().getTokenEndpoint().isEmpty() ? DEFAULT_TOKEN : tokenEndpoint;
 	}
 
 	public static HttpClientBuilder getInstance()
@@ -50,6 +62,34 @@ public class HttpClientBuilder
 			instance = new HttpClientBuilder();
 		}
 		return instance;
+	}
+	
+	public synchronized void loadCSRFToken(){
+	
+		HttpRequestBase tokenRequest = new HttpGet(tokenEndpoint);
+		HttpResponse tokenResponse;
+		
+		try {
+			
+			// exec request
+			tokenResponse = getInstance().getHttpClient().execute(tokenRequest);
+			// extract token
+			setCSRFToken(tokenResponse.getFirstHeader("X-CSRF-TOKEN").getValue());			
+			
+		} catch (ClientProtocolException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
+	public String getCSRFToken(){
+		return token;
+	}
+	
+	public String setCSRFToken(String token){
+		return this.token = token;
 	}
 
 	/**
@@ -100,11 +140,13 @@ public class HttpClientBuilder
 			
 			// A timeout exception will print an output like this: "Timeout exception.: exception: Read timed out"
 			
+			CookieStore httpCookieStore = new BasicCookieStore();
+			
 			httpClient = HttpClients.custom()
 					.setDefaultRequestConfig(requestConfig)
 			        .setRetryHandler(retryHandler)
-			        // set a cookie to store jsessionid 
-			        .setDefaultCookieStore(new BasicCookieStore())
+			        // set a cookie store to handle jsessionid
+			        .setDefaultCookieStore(httpCookieStore)
 			        .build();
 			
 			if (retryHandler == null)

@@ -13,6 +13,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.log4j.Logger;
 
@@ -33,11 +34,24 @@ public class DefaultResponseHandler<T extends DomainObject> implements ResponseH
 	@Override
 	public Response<T> handleResponse(HttpResponse response) throws ClientProtocolException, IOException
 	{
+		
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.getInstance();
+		
 		int statusCode = response.getStatusLine().getStatusCode();
 		log.info(String.format("Handling response [%s]", statusCode));
 
 		if (!isHttpStatusOK(response.getStatusLine().getStatusCode()))
 		{
+			
+			// Catch 401/403 error to load a new csrf
+			if ( statusCode == 401 || statusCode == 403 ){
+				
+				httpClientBuilder.loadCSRFToken();
+				log.info("Loading new CSRF token");
+				
+			}
+			
+			
 			String errorDetail = null;
 			try
 			{
@@ -65,6 +79,14 @@ public class DefaultResponseHandler<T extends DomainObject> implements ResponseH
 		Map<String, String> headers = new HashMap<String, String>();
 		for (Header header : response.getAllHeaders())
 		{
+			// check if CSRF is changed
+			if (header.getName().equals("X-CSRF-TOKEN")){
+				
+				if (!header.getValue().equals(httpClientBuilder.getCSRFToken()))
+					httpClientBuilder.setCSRFToken(header.getValue());
+				
+			}
+			
 			headers.put(header.getName(), header.getValue());
 		}
 		retval.setHeaders(headers);

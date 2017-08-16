@@ -43,6 +43,10 @@ public class AppConfig
 	private Integer connectionTimeout;
 
 	private Integer socketTimeout;
+	
+	private String measuresEndpoint;
+
+	private String tokenEndpoint;
 
 	private final Properties prop = new Properties();
 
@@ -158,6 +162,14 @@ public class AppConfig
 		return baseUri;
 	}
 
+	public String getMeasuresEndpoint() {
+		return baseUri+measuresEndpoint;
+	}
+
+	public String getTokenEndpoint() {
+		return baseUri+tokenEndpoint;
+	}
+
 	public void setBaseUri(String baseUri)
 	{
 		this.baseUri = baseUri;
@@ -183,6 +195,16 @@ public class AppConfig
 		this.socketTimeout = socketTimeout;
 	}
 
+	public void setMeasuresEndpoint(String measuresEndpoint)
+	{
+		this.measuresEndpoint = measuresEndpoint;
+	}
+
+	public void setTokenEndpoint(String tokenEndpoint) 
+	{
+		this.tokenEndpoint = tokenEndpoint;
+	}
+	
 	/**
 	 * Reloads the properties from config file
 	 */
@@ -190,4 +212,5 @@ public class AppConfig
 	{
 		loadProperties();
 	}
+
 }

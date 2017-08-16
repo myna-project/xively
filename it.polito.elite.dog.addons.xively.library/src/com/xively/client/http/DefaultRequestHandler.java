@@ -42,7 +42,7 @@ public class DefaultRequestHandler
 	private static final String HEADER_USER_AGENT = "User Agent";
 	private static final String XIVELY_USER_AGENT = "Xively-Java-Lib/0.1.0-SNAPSHOT";
 
-	private String baseURI;
+	private String measureEndpoint;
 
 	private HttpClient httpClient;
 
@@ -58,16 +58,16 @@ public class DefaultRequestHandler
 		// singleton
 	}
 
-	private DefaultRequestHandler(String baseURI)
+	private DefaultRequestHandler(String measureEndpoint)
 	{
-		this.baseURI = baseURI;
+		this.measureEndpoint = measureEndpoint;
 	}
 
 	public static DefaultRequestHandler getInstance()
 	{
 		if (instance == null)
 		{
-			instance = new DefaultRequestHandler(AppConfig.getInstance().getBaseURI());
+			instance = new DefaultRequestHandler(AppConfig.getInstance().getMeasuresEndpoint());
 		}
 		return instance;
 	}
@@ -189,7 +189,15 @@ public class DefaultRequestHandler
 		request.addHeader("accept", mediaType.getMediaType());
 		request.addHeader(HEADER_KEY_API, AppConfig.getInstance().getApiKey());
 		request.addHeader(HEADER_USER_AGENT, XIVELY_USER_AGENT);
-
+		
+		// add token header
+		if (HttpClientBuilder.getInstance().getCSRFToken() != null)
+			request.addHeader("X-CSRF-TOKEN", HttpClientBuilder.getInstance().getCSRFToken());
+		
+		// add basic auth
+		request.setHeader("Authorization", "Basic YWRtaW46YWRtaW4=");
+		
+		
 		if (log.isDebugEnabled())
 		{
 			StringBuilder sb = new StringBuilder();
@@ -211,7 +219,7 @@ public class DefaultRequestHandler
 		{
 			path = appPath.concat(".").concat(mediaType.name());
 		}
-		uriBuilder.setScheme("http").setHost(baseURI).setPath(path);
+		uriBuilder.setScheme("http").setHost(measureEndpoint).setPath(path);
 		if (params != null && !params.isEmpty())
 		{
 			for (Entry<String, Object> param : params.entrySet())
