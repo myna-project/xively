@@ -74,6 +74,8 @@ public class XivelyClient implements ManagedService, EventHandler
 	public static final String XIVELY_DELIVERY_QUEUE_TUNING_STEP = "xively.deliveryQueue.tuningStep";
 	private static final String XIVELY_MEDIA_TYPE = "xively.mediaType";
 	private static final String XIVELY_BASE_URI = "xively.baseURI";
+	private static final String XIVELY_MEASURE_ENDPOINT = "xively.measuresEndpoint";
+	private static final String XIVELY_TOKEN_ENDPOINT = "xively.token";
 	private static final String XIVELY_SERIAL = "xively.serial";
 	private static final String XIVELY_PRODUCT_SECRET = "xively.productSecret";
 	
@@ -116,6 +118,12 @@ public class XivelyClient implements ManagedService, EventHandler
 
 	// the base uri
 	private String baseURI = "api.xively.com/v2/";
+	
+	// the endpoint used to send measures
+	private String measuresEndpoint;
+	
+	// the endpoint used to get the csrf token
+	private String tokenEndpoint;
 
 	// the waiting list maximum size
 	private final int maxListSize = 500; // defined by the XIVELY api
@@ -357,6 +365,12 @@ public class XivelyClient implements ManagedService, EventHandler
 			
 			// get the base uri
 			String uri = (String) properties.get(XivelyClient.XIVELY_BASE_URI);
+			
+			// get the base uri
+			this.measuresEndpoint = (String) properties.get(XivelyClient.XIVELY_MEASURE_ENDPOINT);
+						
+			// get the base uri
+			this.tokenEndpoint = (String) properties.get(XivelyClient.XIVELY_TOKEN_ENDPOINT);
 
 			if ((uri != null) && (!uri.isEmpty()))
 				this.baseURI = uri;
@@ -431,6 +445,8 @@ public class XivelyClient implements ManagedService, EventHandler
 			appConfig.setSocketTimeout(this.connectionTimeout);
 			appConfig.setResponseMediaType(AcceptedMediaType.json);
 			appConfig.setBaseUri(this.baseURI);
+			appConfig.setMeasuresEndpoint(this.measuresEndpoint);
+			appConfig.setTokenEndpoint(this.tokenEndpoint);
 
 			// check the key
 			if (((this.key == null) || (this.key.isEmpty()))
