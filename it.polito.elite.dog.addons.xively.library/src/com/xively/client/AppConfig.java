@@ -167,7 +167,7 @@ public class AppConfig
 	}
 
 	public String getTokenEndpoint() {
-		return baseUri+tokenEndpoint;
+		return "http://" + baseUri+tokenEndpoint;
 	}
 
 	public void setBaseUri(String baseUri)
