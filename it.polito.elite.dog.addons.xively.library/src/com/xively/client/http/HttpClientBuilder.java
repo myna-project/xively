@@ -50,9 +50,14 @@ public class HttpClientBuilder
 
 	private HttpClientBuilder()
 	{
-		connectionTimeout = AppConfig.getInstance().getConnectionTimeout() == null ? DEFAULT_CONNECTION_TIMEOUT_IN_MS : connectionTimeout;
-		socketTimeout = AppConfig.getInstance().getSocketTimeout() == null ? DEFAULT_SOCKET_TIMEOUT_IN_MS : socketTimeout;
-		tokenEndpoint = AppConfig.getInstance().getTokenEndpoint().isEmpty() ? DEFAULT_TOKEN : tokenEndpoint;
+		connectionTimeout = AppConfig.getInstance().getConnectionTimeout();
+		connectionTimeout = (connectionTimeout == null) ? DEFAULT_CONNECTION_TIMEOUT_IN_MS : connectionTimeout;
+		
+		socketTimeout = AppConfig.getInstance().getSocketTimeout();
+		socketTimeout = (socketTimeout == null) ? DEFAULT_SOCKET_TIMEOUT_IN_MS : socketTimeout;
+		
+		tokenEndpoint = AppConfig.getInstance().getTokenEndpoint();
+		tokenEndpoint = (tokenEndpoint.isEmpty()) ? DEFAULT_TOKEN : tokenEndpoint;
 	}
 
 	public static HttpClientBuilder getInstance()
