@@ -24,3 +24,5 @@ Import-Package: com.xively.client,
  org.osgi.service.event,
  org.osgi.service.log;version="1.3.0"
 Bundle-ActivationPolicy: lazy
+Export-Package: org.glassfish.jersey,
+ org.glassfish.jersey.client
